@@ -13,3 +13,9 @@ class Piece(pg.sprite.Sprite):
 class Archer(Piece):
     def __init__(self, CS:int, color: str, field: str):
         super().__init__(CS, color, field, '_archer.png')
+
+#class BlackArcher(Archer):
+#    super()
+
+#class WhiteArcher(Archer):
+#    super()

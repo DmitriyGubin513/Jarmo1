@@ -1,12 +1,20 @@
 import pygame as pg
 from game_config import *
-from archers import *
+import archers
 import board_data
 
 pg.init()
 
 class Jarmoboard():
     def __init__(self, screen, CellQty: int = CellQty, CS: int = CS):
+        # создаем piece_types{}
+        # Здесь мы храним параметры для создания спрайта
+        self.pieces_types = {
+            'A': ('w', ''),
+            'a': ('b', '')
+        }
+        #self.pieces_types["a"]
+        self.__screen = screen
         self.__prepare_screen(screen)
         self.__table = board_data.board
         self.__archers_types = Piece_Types
@@ -68,10 +76,30 @@ class Jarmoboard():
     def __draw_all_pieces(self):
         for j, row in enumerate(self.__table):
             for i, field_value in enumerate(row):
-                if field_value != 0:
+                # Проверяем есть ли в ключах словаря pieces_types название, содержащееся в field_value
+                if field_value in self.pieces_types.keys(): # if field_value != 0:
                     p_archer = self.__create_piece(field_value,(j,i))
                     self.__all_pieces.add(p_archer)
 
-    def __create_piece(self, piece_symbol:str, table_coord:tuple):
-        piece_tuple = self.pieces_types[peaces_symbol]
-        return Archer(self.__size)
+            for ix, piece in enumerate(self.__all_pieces):
+                print(f"Добавляю piece класса {piece.__class__} с координатами {piece.rect.x}, {piece.rect.y}")
+                self.__screen.blit(piece.image, piece.rect)
+
+
+    def __create_piece(self, symbol : str, table_coord : tuple):
+        # Преобразование координат для борды
+        if symbol == 'a':
+            x = table_coord[1] * (CS + CS / 2 + 98)
+            y = table_coord[0] * (CS * 2 + CS / 2 + 150)
+        elif symbol == 'A':
+            x = table_coord[1] * (CS + CS / 2 + 102)
+            y = table_coord[0] * (CS * 2 + CS / 2 + 150)
+        else:
+            raise f"Unknown symbol {symbol}"
+
+        # unzip: *('w', '') === 'w', '' тождественно равны
+        piece = archers.Archer(CS, *self.pieces_types[symbol])
+        # делаем штуки с писом
+        piece.rect.x = x
+        piece.rect.y = y
+        return piece

@@ -8,9 +8,6 @@ screen.fill(Brown_Wood_Light)
 
 jarmoboard = Jarmoboard(screen)
 
-
-
-
 run = True
 while run:
     for event in pg.event.get():
