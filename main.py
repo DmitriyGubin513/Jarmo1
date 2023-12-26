@@ -10,8 +10,8 @@ jarmoboard = Jarmoboard(screen)
 
 run = True
 while run:
+    clock.tick(FPS)
     for event in pg.event.get():
         if event.type == pg.QUIT:
             pg.quit()
             run = False
-    clock.tick(FPS)
