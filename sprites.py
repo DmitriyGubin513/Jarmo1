@@ -19,20 +19,29 @@ class Location(pg.sprite.Sprite):
 
 
 class Piece(pg.sprite.Sprite):
-    def __init__(self, CS:int, color: str, field_name: str, file_posfix: str):
+    def __init__(self, color: str, field_name: str, file_posfix: str, pos: tuple[int, int]):
         super().__init__()
         picture = pg.image.load(Piece_Path + color + file_posfix).convert_alpha()
-        self.image = pg.transform.scale(picture, (CS*2,CS*2)) ##откоректировать сайз когда прога начнёт работать так, что бы кружки были клетками...вроде бы
-        self.rect = self.image.get_rect()
+        self.image = pg.transform.scale(picture, (CS, CS))
+        self.rect = self.image.get_rect(topleft=(pos[1] * CS * 1 + 98,
+                                                 pos[0] * CS * 2 + 150))
         self._color = color
         self.field_name = field_name
+        self.pos = pos
+
+    def get_loc(self, board):
+        return board.loc[self.pos[0] + self.pos[1] * 5]
 
 class Archer(Piece):
-    def __init__(self, CS:int, color: str, field: str):
-        super().__init__(CS, color, field, '_archer.png')
+    def __init__(self, color: str, field: str, pos: tuple[int, int]):
+        super().__init__(color, field, '_archer.png', pos)
 
-#class BlackArcher(Archer):
-#    super()
 
-#class WhiteArcher(Archer):
-#    super()
+class BlackArcher(Archer):
+    def __init__(self, color: str, field: str, pos: tuple[int, int]):
+        super().__init__(color, field, pos)
+
+
+class WhiteArcher(Archer):
+    def __init__(self, color: str, field: str, pos: tuple[int, int]):
+        super().__init__(color, field, pos)
