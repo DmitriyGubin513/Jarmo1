@@ -8,11 +8,7 @@ pg.init()
 
 class Jarmoboard():
     def __init__(self, screen):
-        self.pieces_types = {
-            'A': ('w', ''),
-            'a': ('b', '')
-        }
-        #self.pieces_types["a"]
+        self.pieces_types = ['a', 'A']
         self.__screen = screen
         self.__prepare_screen(screen)
         self.__table = board_data.board
@@ -27,45 +23,50 @@ class Jarmoboard():
         screen.blit(back_img, (0, 0))
 
     def __create_board(self):
-        pg.draw.rect(self.__screen, Brown, (217, 325 + CS / 4, 168, 328), 5)
 
         self.loc = []
         for i in range(0, 25):
             self.loc.append(sprites.Location((i // 5, i % 5)))
 
-        self.loc[0].valid_moves.extend([self.loc[7], self.loc[11]])
-        self.loc[1].valid_moves.extend([self.loc[8], self.loc[10]])
-        self.loc[2].valid_moves.extend([self.loc[5], self.loc[9], self.loc[11]])
-        self.loc[3].valid_moves.extend([self.loc[6], self.loc[14]])
-        self.loc[4].valid_moves.extend([self.loc[7], self.loc[13]])
-        self.loc[5].valid_moves.extend([self.loc[2], self.loc[12]])
-        self.loc[6].valid_moves.extend([self.loc[3], self.loc[7], self.loc[11], self.loc[13]])
-        self.loc[7].valid_moves.extend([self.loc[0], self.loc[4], self.loc[6], self.loc[8], self.loc[16]])
-        self.loc[8].valid_moves.extend([self.loc[1], self.loc[7],  self.loc[13], self.loc[19]])
-        self.loc[9].valid_moves.extend([self.loc[2], self.loc[12]])
-        self.loc[10].valid_moves.extend([self.loc[1], self.loc[21]])
-        self.loc[11].valid_moves.extend([self.loc[0], self.loc[2], self.loc[6], self.loc[16], self.loc[18], self.loc[20]])
-        self.loc[12].valid_moves.extend([self.loc[5], self.loc[9], self.loc[15], self.loc[23]])
-        self.loc[13].valid_moves.extend([self.loc[4], self.loc[6], self.loc[8], self.loc[18], self.loc[22], self.loc[24]])
-        self.loc[14].valid_moves.extend([self.loc[3], self.loc[17]])
-        self.loc[15].valid_moves.extend([self.loc[12], self.loc[22]])
-        self.loc[16].valid_moves.extend([self.loc[7], self.loc[11], self.loc[17], self.loc[23]])
-        self.loc[17].valid_moves.extend([self.loc[14], self.loc[16], self.loc[18], self.loc[20], self.loc[24]])
-        self.loc[18].valid_moves.extend([self.loc[11], self.loc[13], self.loc[17], self.loc[21]])
-        self.loc[19].valid_moves.extend([self.loc[8], self.loc[22]])
-        self.loc[20].valid_moves.extend([self.loc[11], self.loc[17]])
-        self.loc[21].valid_moves.extend([self.loc[10], self.loc[18]])
-        self.loc[22].valid_moves.extend([self.loc[13], self.loc[15], self.loc[20]])
-        self.loc[23].valid_moves.extend([self.loc[12], self.loc[16]])
-        self.loc[24].valid_moves.extend([self.loc[13], self.loc[17]])
+        connections = {
+            0: [7, 11],
+            1: [8, 10],
+            2: [5, 9, 11],
+            3: [6, 14],
+            4: [7, 13],
+            5: [2, 12],
+            6: [3, 7, 11, 13],
+            7: [0, 4, 6, 8, 16],
+            8: [1, 7, 13, 19],
+            9: [2, 12],
+            10: [1, 21],
+            11: [0, 2, 6, 16, 18, 20],
+            12: [5, 9, 15, 23],
+            13: [4, 6, 8, 18, 22, 24],
+            14: [3, 17],
+            15: [12, 22],
+            16: [7, 11, 17, 23],
+            17: [14, 16, 18, 20, 24],
+            18: [11, 13, 17, 21],
+            19: [8, 22],
+            20: [11, 17],
+            21: [10, 18],
+            22: [13, 15],
+            23: [12, 16],
+            24: [13, 17]
+        }
 
-        for l in self.loc:
-            for adj in l.valid_moves:
+        for i, loc in enumerate(self.loc):
+            for connected_loc in connections.get(i, []):
+                loc.valid_moves.append(self.loc[connected_loc])
+                self.loc[connected_loc].valid_moves.append(loc)
+        
+        for location in self.loc:
+            for adjustment in location.valid_moves:
                 pg.draw.line(self.__screen, Brown,
-                             [l.rect[0] + l.radius, l.rect[1] + l.radius],
-                             [adj.rect[0] + l.radius, adj.rect[1] + l.radius],
-                             6)
-
+                        [location.rect[0] + location.radius, location.rect[1] + location.radius],
+                        [adjustment.rect[0] + location.radius, adjustment.rect[1] + location.radius],
+                        6)
         pg.draw.rect(self.__screen, Brown_Red, (0, 150 - CS , 600, 60))
         pg.draw.rect(self.__screen, Brown_Wood, (0, 0, 600, 150 - CS))
         pg.draw.rect(self.__screen, Brown_Red, (0, 1000 - (210) + CS, 600, 60))
@@ -73,8 +74,8 @@ class Jarmoboard():
         pg.draw.rect(self.__screen, Brown_Midle, (0, 210 - CS, CS / 2 + 60, 1000 - 2 * (210-CS)))
         pg.draw.rect(self.__screen, Brown_Midle, (540 - CS / 2, 210 - CS, CS / 2 + 60, 1000 - 2 * (210-CS)))
 
-        for l in self.loc:
-            self.__screen.blit(l.image, l.rect)
+        for location in self.loc:
+            self.__screen.blit(location.image, location.rect)
 
 
     # Перерисовываем board:
@@ -84,12 +85,12 @@ class Jarmoboard():
         back_img = pg.image.load(IMG_Path_1 + IMG_1)
         self.__screen.blit(back_img, (0, 0))
 
-        for l in self.loc:
-            for adj in l.valid_moves:
+        for location in self.loc:
+            for adjustment in location.valid_moves:
                 pg.draw.line(self.__screen, Brown,
-                             [l.rect[0] + l.radius, l.rect[1] + l.radius],
-                             [adj.rect[0] + l.radius, adj.rect[1] + l.radius],
-                             6)
+                        [location.rect[0] + location.radius, location.rect[1] + location.radius],
+                        [adjustment.rect[0] + location.radius, adjustment.rect[1] + location.radius],
+                        6)
 
         pg.draw.rect(self.__screen, Brown_Red, (0, 150 - CS , 600, 60))
         pg.draw.rect(self.__screen, Brown_Wood, (0, 0, 600, 150 - CS))
@@ -99,6 +100,10 @@ class Jarmoboard():
         pg.draw.rect(self.__screen, Brown_Midle, (540 - CS / 2, 210 - CS, CS / 2 + 60, 1000 - 2 * (210-CS)))
 
         for l in self.loc:
+            if board_data.board[l.pos[1]][l.pos[0]] == 1:
+                l.redraw_sprite(True)
+            else:
+                l.redraw_sprite(False)
             self.__screen.blit(l.image, l.rect)
 
         for piece in self.all_pieces:
@@ -110,7 +115,7 @@ class Jarmoboard():
         for j, row in enumerate(self.__table):
             for i, field_value in enumerate(row):
                 # Проверяем есть ли в ключах словаря pieces_types название, содержащееся в field_value
-                if field_value in self.pieces_types.keys(): # if field_value != 0:
+                if field_value in self.pieces_types: # if field_value != 0:
                     p_archer = self.__create_piece(field_value,(j,i))
                     self.all_pieces.add(p_archer)
 
@@ -120,9 +125,9 @@ class Jarmoboard():
 
     def __create_piece(self, symbol : str, table_coord : tuple[int, int]):
         if symbol == 'a':
-            piece = sprites.BlackArcher(*self.pieces_types[symbol], pos=table_coord)
+            piece = sprites.BlackArcher(pos=table_coord)
         elif symbol == 'A':
-            piece = sprites.WhiteArcher(*self.pieces_types[symbol], pos=table_coord)
+            piece = sprites.WhiteArcher(pos=table_coord)
         else:
             raise f"Unknown symbol {symbol}"
         return piece
